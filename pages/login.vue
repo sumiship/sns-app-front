@@ -1,16 +1,8 @@
 <template>
-  <div class="register">
-    <div class="register-box">
-      <div class="register-box__title">Register</div>
-      <div class="register-box__input">
-        <input
-          v-model="name"
-          type="type"
-          placeholder="ユーザーネーム"
-          required
-        />
-      </div>
-      <div class="register-box__input">
+  <div class="login">
+    <div class="login-box">
+      <div class="login-box__title">Login</div>
+      <div class="login-box__input">
         <input
           v-model="email"
           type="email"
@@ -18,7 +10,7 @@
           required
         />
       </div>
-      <div class="register-box__input">
+      <div class="login-box__input">
         <input
           v-model="password"
           type="password"
@@ -26,7 +18,7 @@
           required
         />
       </div>
-      <div class="register-box__button" @click="register">新規登録</div>
+      <div class="login-box__button" @click="login">ログイン</div>
     </div>
   </div>
 </template>
@@ -36,38 +28,36 @@ import firebase from "~/plugins/firebase";
 export default {
   data() {
     return {
-      name: "",
       email: null,
       password: null
     };
   },
   methods: {
-    register() {
+    login() {
       if (!this.email || !this.password) {
         alert("メールアドレスまたはパスワードが入力されていません。");
         return;
       }
       firebase
         .auth()
-        .createUserWithEmailAndPassword(this.email, this.password)
-        .then(data => {
-          data.user.updateProfile({
-            displayName: this.name
-          });
-          this.$store.dispatch("call_set_userID", data.user.uid);
-          // console.log(data.user.uid);
-          this.$router.replace("/");
+        .signInWithEmailAndPassword(this.email, this.password)
+        .then(() => {
+          alert("ログインが完了しました");
+          this.$router.push("/");
         })
         .catch(error => {
           switch (error.code) {
             case "auth/invalid-email":
               alert("メールアドレスの形式が違います。");
               break;
-            case "auth/email-already-in-use":
-              alert("このメールアドレスはすでに使われています。");
+            case "auth/user-disabled":
+              alert("ユーザーが無効になっています。");
               break;
-            case "auth/weak-password":
-              alert("パスワードは6文字以上で入力してください。");
+            case "auth/user-not-found":
+              alert("ユーザーが存在しません。");
+              break;
+            case "auth/wrong-password":
+              alert("パスワードが間違っております。");
               break;
             default:
               alert("エラーが起きました。しばらくしてから再度お試しください。");
@@ -78,13 +68,12 @@ export default {
   }
 };
 </script>
-
 <style lang="scss" scoped>
-.register {
+.login {
   height: calc(100vh - 80px); //画面高さ - header高さ
   position: relative;
 }
-.register-box {
+.login-box {
   position: absolute;
   top: 40%;
   left: 50%;

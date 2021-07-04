@@ -16,6 +16,7 @@
   height: 80px;
   padding: 0 20px;
   background-color: rgb(230, 100, 122);
+  box-shadow: 0 0 3px 3px rgb(126, 70, 80);
   display: flex;
   align-items: center;
   justify-content: space-between;
