@@ -32,6 +32,7 @@
 </template>
 
 <script>
+// import { mapState } from "vuex/types/helpers";
 import firebase from "~/plugins/firebase";
 export default {
   data() {
@@ -54,7 +55,11 @@ export default {
           data.user.updateProfile({
             displayName: this.name
           });
-          this.$store.dispatch("call_set_userID", data.user.uid);
+          this.$store.dispatch("create_user", {
+            userID: data.user.uid,
+            name: this.name
+          });
+          // this.$store.dispatch("call_set_userID", data.user.uid);
           // console.log(data.user.uid);
           this.$router.replace("/");
         })

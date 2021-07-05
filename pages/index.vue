@@ -2,23 +2,21 @@
   <div class="index">
     <div class="home">
       <div class="home__title">Home</div>
-      <div class="home__share share-box">
-        <div class="share-box__input">
-          <textarea
-            id="textarea"
-            v-model="content"
-            placeholder="今何してる？"
-            @input="areaFlex()"
-          ></textarea>
-        </div>
-        <div class="share-box__button">share</div>
+      <div class="home__share">
+        <Share />
       </div>
-      <div class="home__posts"></div>
+      <div class="home__posts">
+        <div class="post" v-for="(post, index) in posts" :key="index">
+          <div class="post__people">{{ post.person_id }}</div>
+          <div class="post__content">{{ post.content }}</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts">
 import { Component, Vue } from "nuxt-property-decorator";
+import axios from "axios";
 
 @Component({
   layout: "nonHeader"
@@ -26,14 +24,15 @@ import { Component, Vue } from "nuxt-property-decorator";
   // },
 })
 export default class Index extends Vue {
-  private content = "";
+  private posts = [];
 
-  private areaFlex(): void {
-    let textarea = document.getElementById("textarea");
-    let clientHeight = textarea.clientHeight;
-    textarea.style.height = clientHeight + "px";
-    let scrollHeight = textarea.scrollHeight;
-    textarea.style.height = scrollHeight + "px";
+  private async get_post(): Promise<void> {
+    const posts = await axios.get("http://127.0.0.1:8000/api/post");
+    this.posts = JSON.parse(JSON.stringify(posts.data.data));
+  }
+
+  mounted() {
+    this.get_post();
   }
 }
 </script>
@@ -57,9 +56,6 @@ export default class Index extends Vue {
     border-bottom: 1px solid white;
     z-index: 1;
   }
-  &__share {
-    height: 300px;
-  }
   &__posts {
     height: 2000px;
     background-color: rgb(197, 51, 51);
@@ -68,18 +64,6 @@ export default class Index extends Vue {
 @media screen and (max-width: 700px) {
   .home {
     border: none;
-  }
-}
-.share-box {
-  &__input {
-    & textarea {
-      background-color: rgb(221, 154, 159);
-      border: none;
-      resize: none;
-      font-size: 18px;
-      width: 100%;
-      height: 90px;
-    }
   }
 }
 </style>
