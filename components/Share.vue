@@ -13,19 +13,22 @@
   </div>
 </template>
 <script lang="ts">
-import { Component, Vue } from "nuxt-property-decorator";
+import { Component, Vue, Emit } from "nuxt-property-decorator";
 import axios from "axios";
 
 @Component({})
 export default class Share extends Vue {
   private content = "";
 
+  @Emit("get_post")
   private async create_post(): Promise<void> {
     const sendData = {
       person_id: this.$store.state.userID,
       content: this.content
     };
-    await axios.post("http://127.0.0.1:8000/api/post", sendData);
+    const ret = await axios.post("http://127.0.0.1:8000/api/post", sendData);
+    console.log(ret);
+    this.content = "";
   }
 
   private areaFlex(): void {
