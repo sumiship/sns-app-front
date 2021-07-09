@@ -1,26 +1,21 @@
 <template>
-  <div class="home">
-    <div class="home__title">Home</div>
-    <div class="home__share">
-      <Share @get_post="get_post()" />
-    </div>
-    <div class="home__posts">
-      <div
-        class="post"
-        @click="$router.push('/comment/' + post.id)"
-        v-for="(post, index) in posts"
-        :key="index"
-      >
-        <div class="post__info post-info">
-          <div class="post-info__people">{{ post.person_name }}</div>
-          <div class="post-info__time">{{ post.created_at }}</div>
+  <div class="comment">
+    <div class="comment__title">comment</div>
+    <div class="comment__post comment-post">
+      <div class="comment-post">
+        <div class="comment-post__info comment-post-info">
+          <div class="comment-post-info__people">{{ post.person_name }}</div>
+          <div class="comment-post-info__time">{{ post.created_at }}</div>
         </div>
-        <div class="post__content">{{ post.content }}</div>
-        <div class="post__actions post-action">
-          <div class="post-action__heart" @click.stop="send_like(post.id)">
+        <div class="comment-post__content">{{ post.content }}</div>
+        <div class="comment-post__actions comment-post-action">
+          <div
+            class="comment-post-action__heart"
+            @click.stop="send_like($route.params.id)"
+          >
             <span>{{ post.like_count }}</span>
           </div>
-          <div class="post-action__cross"></div>
+          <div class="comment-post-action__cross"></div>
         </div>
       </div>
     </div>
@@ -36,16 +31,13 @@ import axios from "axios";
   // },
 })
 export default class Index extends Vue {
-  private posts = [];
+  private post = [];
 
   private async get_post(): Promise<void> {
-    const posts = await axios.get("http://127.0.0.1:8000/api/post");
-    this.posts = JSON.parse(JSON.stringify(posts.data.data));
-    console.log(this.posts[1].created_at > this.posts[2].created_at);
-    this.posts.sort((a: object, b: object) => {
-      if (a.created_at < b.created_at) return 1;
-      return -1;
-    });
+    const post = await axios.get(
+      "http://127.0.0.1:8000/api/post/" + this.$route.params.id
+    );
+    this.post = JSON.parse(JSON.stringify(post.data));
   }
 
   private async send_like(post_id: number): Promise<void> {
@@ -57,13 +49,16 @@ export default class Index extends Vue {
     this.get_post();
   }
 
+  private test(num: string): void {
+    console.log(num);
+  }
   mounted() {
     this.get_post();
   }
 }
 </script>
 <style lang="scss" scoped>
-.home {
+.comment {
   // position: relative;
   max-width: 700px;
   width: 100%;
@@ -92,14 +87,14 @@ export default class Index extends Vue {
   }
 }
 
-.post {
+.comment-post {
   border-bottom: 1px solid white;
   padding: 10px;
   &__actions {
     width: 50%;
   }
 }
-.post-info {
+.comment-post-info {
   display: flex;
   align-items: center;
   &__people {
@@ -110,7 +105,7 @@ export default class Index extends Vue {
     color: rgb(77, 75, 75);
   }
 }
-.post-action {
+.comment-post-action {
   display: flex;
   justify-content: space-around;
   height: 20px;
