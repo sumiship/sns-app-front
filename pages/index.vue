@@ -12,12 +12,14 @@
         :key="index"
       >
         <div class="post__info post-info">
-          <div class="post-info__people">{{ post.person_name }}</div>
-          <div class="post-info__time">{{ post.created_at }}</div>
+          <div class="post-info__people">{{ post.person.name }}</div>
+          <div class="post-info__time">{{ formatTime(post.created_at) }}</div>
         </div>
         <div class="post__content">{{ post.content }}</div>
         <div class="post__actions post-action">
           <div class="post-action__heart" @click.stop="send_like(post.id)">
+            <span v-if="!post.isLike">🤍</span>
+            <span v-if="post.isLike">🧡</span>
             <span>{{ post.like_count }}</span>
           </div>
           <div class="post-action__cross"></div>
@@ -30,22 +32,39 @@
 import { Component, Vue } from "nuxt-property-decorator";
 import axios from "axios";
 
+interface Post {
+  id: number;
+  person_id: string;
+  content: string;
+  created_at: string;
+  update_at: string;
+  like_count: number;
+  person: string[];
+}
+
 @Component({
   layout: "nonHeader"
   // components: {
   // },
 })
 export default class Index extends Vue {
-  private posts = [];
+  private posts: Post[] = [];
+
+  private formatTime(time: string): string {
+    return time;
+  }
 
   private async get_post(): Promise<void> {
-    const posts = await axios.get("http://127.0.0.1:8000/api/post");
+    console.log("id  " + this.$store.state.userID);
+    const posts = await axios.get(
+      "http://127.0.0.1:8000/api/post?person_id=" + this.$store.state.userID
+    );
+    console.log(posts);
     this.posts = JSON.parse(JSON.stringify(posts.data.data));
-    console.log(this.posts[1].created_at > this.posts[2].created_at);
-    this.posts.sort((a: object, b: object) => {
-      if (a.created_at < b.created_at) return 1;
-      return -1;
-    });
+    // console.log(this.posts[1].created_at > this.posts[2].created_at);
+    this.posts.sort((a: Post, b: Post) =>
+      a.created_at < b.created_at ? 1 : -1
+    );
   }
 
   private async send_like(post_id: number): Promise<void> {
@@ -57,6 +76,12 @@ export default class Index extends Vue {
     this.get_post();
   }
 
+  created() {
+    this.$store.dispatch(
+      "call_set_userID",
+      JSON.parse(localStorage["sns-app-key"]).userID
+    );
+  }
   mounted() {
     this.get_post();
   }
@@ -115,19 +140,17 @@ export default class Index extends Vue {
   justify-content: space-around;
   height: 20px;
   %__post-action-item {
-    width: 20px;
+    width: 40px;
     background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
   }
   &__heart {
-    background: url("~/assets/img/heart.png");
     @extend %__post-action-item;
     cursor: pointer;
     & span {
       color: white;
-      display: inline-block;
-      padding-left: 30px;
+      display: inline;
       transform: translateY(-2px);
     }
   }
